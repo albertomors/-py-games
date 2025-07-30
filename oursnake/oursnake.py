@@ -75,7 +75,7 @@ def change_season():
         HUNTER_COLOR = (255, 255, 0)  # Yellow color for hunter in summer
         WALL_COLOR = (0, 0, 0)  # Black color for walls in summer
 
-SEASONS = ["winter", "spring", "summer", "autumn"]
+SEASONS = ["summer", "autumn", "winter", "spring", "win"]
 SEASON = "summer"  # Set default season
 change_season()
 
@@ -109,7 +109,7 @@ rain_amt = 0
 raining = False
 rain_dir = 1
 RAIN_MAX = 1600
-SLIPPERY_PROB = 0.5
+SLIPPERY_PROB = 0.3
 RAIN_PROB = 0.2/FPS
 
 WHITE_PROB = 0.1/FPS
@@ -143,18 +143,19 @@ def draw_game_objects():
         pygame.draw.circle(screen, RATTLE_TAIL_COLOR, (rattle_item[0] * TILESIZE + TILESIZE // 2, rattle_item[1] * TILESIZE + TILESIZE // 2), TILESIZE // 4)
 
     #snake
-    if warp and xs[0] == warp[0] and ys[0] == warp[1]:
+    if warp and xs and xs[0] == warp[0] and ys and ys[0] == warp[1]:
         pass
-    else:
+    elif xs and ys:
         pygame.draw.rect(screen, SNEK_COLOR, (xs[0] * TILESIZE, ys[0] * TILESIZE, TILESIZE, TILESIZE))
 
-    for i in range(1, N_links-1):
-        if (xs[i] == xs[i+1] and ys[i] == ys[i+1]) or (warp and xs[i] == warp[0] and ys[i] == warp[1]):
-            pass
-        else:
-            pygame.draw.rect(screen, SNEK_COLOR, (xs[i] * TILESIZE + OFF, ys[i] * TILESIZE + OFF, BODY_SIZE, BODY_SIZE))
+    if xs and ys:
+        for i in range(1, N_links-1):
+            if (xs[i] == xs[i+1] and ys[i] == ys[i+1]) or (warp and xs[i] == warp[0] and ys[i] == warp[1]):
+                pass
+            else:
+                pygame.draw.rect(screen, SNEK_COLOR, (xs[i] * TILESIZE + OFF, ys[i] * TILESIZE + OFF, BODY_SIZE, BODY_SIZE))
     
-    if rattle_tail:
+    if rattle_tail and xs and ys:
         randoff = round(random.choice([-1, 1]) * random.random() * TILESIZE // 5)
         i=0
         #find direction of the rattle tail
@@ -170,7 +171,7 @@ def draw_game_objects():
                 pygame.draw.rect(screen, RATTLE_TAIL_COLOR, (xs[-1] * TILESIZE + OFF, ys[-1] * TILESIZE + OFF + (TILESIZE-4)//2 + randoff, BODY_SIZE, 4))
             else:
                 pygame.draw.rect(screen, RATTLE_TAIL_COLOR, (xs[-1] * TILESIZE + OFF + (TILESIZE-4)//2 + randoff, ys[-1] * TILESIZE + OFF, 4, BODY_SIZE))
-    else:
+    elif xs and ys:
         pygame.draw.rect(screen, SNEK_COLOR, (xs[-1] * TILESIZE + OFF, ys[-1] * TILESIZE + OFF, BODY_SIZE, BODY_SIZE))
 
     # Draw hunter
@@ -336,6 +337,9 @@ while running:
                     dx = 0
                     dy = random.choice([-1, 1])
             new_x, new_y = xs[0] + dx, ys[0] + dy
+        
+            new_x = new_x % xlim
+            new_y = new_y % ylim
             
             # Check collision with snake body or walls
             if any((new_x == xs[i] and new_y == ys[i]) for i in range(1, N_links)) or \
@@ -350,13 +354,15 @@ while running:
             break
     
     # Handle special action (create walls from snake body)
-    if buttons[pygame.K_RSHIFT]:
-        for i in range(1, N_links):
-            walls.append((xs[i], ys[i]))
-            wall_lifes.append(WALL_LIFE)
-        N_links = 1
-        xs = [xs[0]]
-        ys = [ys[0]]
+    if buttons[pygame.K_RSHIFT] and N_links > 2:
+        for i in range(3, N_links):
+            #add only 1 wall on the same cell
+            if (xs[i], ys[i]) not in walls:
+                walls.append((xs[i], ys[i]))
+                wall_lifes.append(WALL_LIFE)
+        N_links = 3
+        xs = [xs[0], xs[1], xs[2]]
+        ys = [ys[0], ys[1], ys[2]]
 
     #--------------------------------------------------------
     
@@ -366,15 +372,22 @@ while running:
     hunter_moves = {'w': (0, -1), 's': (0, 1), 'a': (-1, 0), 'd': (1, 0)}
     for key, (dx, dy) in hunter_moves.items():
         if buttons[getattr(pygame, f'K_{key}')]:
-            if SEASON == "autumn" and raining and random.random() < 0.3:
+            prob = rain_amt / RAIN_MAX * SLIPPERY_PROB
+            if SEASON == "autumn" and raining and random.random() < prob:
                 if random.choice([True, False]):
                     dx = random.choice([-1, 1])
                     dy = 0
                 else:
                     dx = 0
                     dy = random.choice([-1, 1])
+            
+            new_x = hx + dx
+            new_y = hy + dy
+            new_x = new_x % xlim
+            new_y = new_y % ylim
+
             for i, w in enumerate(walls):
-                if (hx + dx, hy + dy) == (w[0], w[1]):
+                if (new_x, new_y) == (w[0], w[1]):
                     checkhunter = False
                     wall_lifes[i] -= HUNTER_DMG
                     screenx, screeny = dx * SHAKE_AMT, dy * SHAKE_AMT
@@ -416,8 +429,9 @@ while running:
     #--------------------------------------------------------
     
     # Wrap the snake head position
-    xs[0] = xs[0] % xlim
-    ys[0] = ys[0] % ylim
+    for i in range(0,N_links):
+        xs[i] = xs[i] % xlim
+        ys[i] = ys[i] % ylim
 
     # Wrap hunter position
     hx = hx % xlim
@@ -428,17 +442,6 @@ while running:
     # Remove walls that have no life left
     walls = [w for w, life in zip(walls, wall_lifes) if life > 0]
     wall_lifes = [life - 1 for life in wall_lifes if life > 0]
-
-    # Check for collisions
-    if (hx, hy) in list(zip(xs, ys)):
-        if venomous:
-            print("SNAKE WINS!")
-        elif not venomous:
-            if rattle_tail and hx == xs[-1] and hy == ys[-1] and N_links > 2:
-                print("SNAKE WINS!") 
-            else:
-                print("HUNTER WINS!")
-        running = False
 
     # check if snake eats the venomous item
     if venomous_item:
@@ -502,6 +505,20 @@ while running:
 
             #choose the next SEASON
             SEASON = SEASONS[(SEASONS.index(SEASON) + 1) % len(SEASONS)]
+
+            if SEASON=="win":
+                xs = []
+                ys = []
+                draw_game_objects()
+                print("SNAKE WINS!")
+                win_text = font.render("SNAKE WINS!", True, (0, 0, 0))
+                text_rect = win_text.get_rect(center=(SCREENW // 2, SCREENH // 2))
+                screen.blit(win_text, text_rect)
+                pygame.display.flip()
+                pygame.time.delay(2000)  # Show the win text for 2 seconds
+                running = False
+                break
+
             change_season()
             draw_game_objects()
             season_text = font.render(f"{SEASON.capitalize()}", True, (0, 0, 0))
@@ -514,14 +531,24 @@ while running:
     #if its winter make wind that moves laterally both player and snake
     if SEASON == "winter":
         wind = random.randint(-1,1)
-        if not warping:
-            for i in range(N_links):
-                xs[i] += wind
-            hx += wind
-    
+        for i in range(N_links):
+            xs[i] += wind
+        hx += wind
+        #move every item
+        if venomous_item:
+            venomous_item = (venomous_item[0] + wind, venomous_item[1])
+        if bigdamage_item:
+            bigdamage_item = (bigdamage_item[0] + wind, bigdamage_item[1])
+        if rattle_item:
+            rattle_item = (rattle_item[0] + wind, rattle_item[1])
+        if warp:
+            warp = (warp[0] + wind, warp[1])
+        for i, wall in enumerate(walls):
+            walls[i] = (wall[0] + wind, wall[1])
+
     #if its spring add climbing plants that grows from below as walls but avoid growing if they encounter snake or hunter
     elif SEASON == "spring":
-        if random.random() < 0.9:  #90% chance to grow a wall
+        if random.random() < 0.4:  #90% chance to grow a wall
             #select the bottom border
             coords = [(x, ylim-1) for x in range(xlim)]
             #add to coord the cells above the existing walls
@@ -537,6 +564,35 @@ while running:
     #--------------------------------------------------------
 
     draw_game_objects()
+
+    # Check for collisions
+    if (hx, hy) in list(zip(xs, ys)):
+        if venomous:
+            print("SNAKE WINS!")
+            # print it on pygame screen
+            win_text = font.render("SNAKE WINS!", True, (0, 0, 0))
+            text_rect = win_text.get_rect(center=(SCREENW // 2, SCREENH // 2))
+            screen.blit(win_text, text_rect)
+            pygame.display.flip()
+            pygame.time.delay(2000)  # Show the win text for 2 seconds
+        elif not venomous:
+            if rattle_tail and hx == xs[-1] and hy == ys[-1] and N_links > 2:
+                print("SNAKE WINS!")
+                win_text = font.render("SNAKE WINS!", True, (0, 0, 0))
+                text_rect = win_text.get_rect(center=(SCREENW // 2, SCREENH // 2))
+                screen.blit(win_text, text_rect)
+                pygame.display.flip()
+                pygame.time.delay(2000)  # Show the win text for 2 seconds
+            else:
+                print("HUNTER WINS!")
+                # print it on pygame screen
+                win_text = font.render("HUNTER WINS!", True, (0, 0, 0))
+                text_rect = win_text.get_rect(center=(SCREENW // 2, SCREENH // 2))
+                screen.blit(win_text, text_rect)
+                pygame.display.flip()
+                pygame.time.delay(2000)  # Show the win text for 2 seconds
+        
+        running = False
 
     # Control the frame rate
     clock.tick(FPS)
