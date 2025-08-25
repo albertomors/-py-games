@@ -23,6 +23,10 @@ Just a repo containing some games I written using pygame during high school in a
     <img src="https://github.com/albertomors/pygame/blob/7d03baafe88a17f1e6d7fc950e5ac9e738b95f5b/res/snek1.gif" alt="Databay showcase gif" title="Databay showcase gif" width="48%"/>
     <img src="https://github.com/albertomors/-py-games/blob/1e6f2eacb979d9d3f9a8a83634ab41fd05f6851e/res/pong.gif" alt="Databay showcase gif" title="Databay showcase gif" width="48%"/>
 </p>
+<p align="center">
+    <img src="iso!/media/day-night.gif" alt="Databay showcase gif" title="Databay showcase gif" width="48%"/>
+    <img src="iso!/media/dig ore.gif" title="Databay showcase gif" width="48%"/>
+</p>
 
 ## Usage
 You will need `pygame` to run them, to install it, just run `pip install pygame` from the terminal you're running python.
