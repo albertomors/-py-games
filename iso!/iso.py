@@ -40,7 +40,7 @@ FPS = 30
 time_mult = 1
 DAY_LENGTH = 24 * 60 * 60 * 1000 # 24 hours
 MS_IN_HOUR = 60 * 60 * 1000
-INIT_TIME = 20 * MS_IN_HOUR
+INIT_TIME = 8 * MS_IN_HOUR
 SEASON_LENGTH = 91 #days
 TIME_MULT = 2
 
@@ -1192,11 +1192,10 @@ mineral_map = spawn_minerals()
 undermap = mineral_map * undermap
 
 for center in centers:
-    if center != random_center:
+    if center not in [random_center, another_center]:
         uppermap[center[1]][center[0]] = 13
         undermap[center[1]][center[0]] = 13
 undermap[another_center[1]][another_center[0]] = 99
-undermap[random_center[1]][random_center[0]] = 99
 
 world = 'up'
 map = uppermap
@@ -1470,7 +1469,10 @@ class Player:
             self.lookup_table(-7, bx, by)
         #ladder
         elif map[ny][nx] == 1 and current_item == 8:
-            self.lookup_table(13, nx, ny)
+            if undermap[ny][nx] == 99:
+                print("You cannot build a ladder here. Try another cell around")
+            else:
+                self.lookup_table(13, nx, ny)
 
         if current_item == 6 and map[by][bx] in (1,4):
             if map[by][bx] == 4:
@@ -1684,7 +1686,7 @@ def main():
 
         if moved_view: 
             active_cells = active_map()
-            hull_points = convex_map()
+            # hull_points = convex_map()
 
         # =======================================================================
         # updating
