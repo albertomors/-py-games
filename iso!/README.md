@@ -50,5 +50,8 @@ build_table = {
 - **wave pattern:** the sea has waves that moves harmonically from the map borders towards the center of the map. The combination between color changing and height offset creates a pretty wavy effect, which get _naturalized_ by using a constant randomic offset map that is used by waves to constantly offset their vertical position, adding some turbulence in the _too much regular_ sinusoidal motion. The randomic offset map is also used to create some variety betweem the colors of trees and stones, giving a _natural looking_ effect to them.
 - **procedurally-generated map** (here i got helped by my dear friend ChatGPT) There are n=7 islands in the archipelago. The same map is re-cycled to optimize the generation time and to match the upper and underworld such that under every island there are big caves you can reach by ladders and explore to mine ores. This generates 4 island levels which got used to spawn trees in the most inner part of the island and stones/rocks towards the sea. Every night 30 new trees spawns. Underground minerals are spawned with another randomic generation procedure that spawns small clusters of size 2x2 or 3x3 with increased rarity from coal to diamond.
 - **BFS for underworld view:** under ground it's darker, you have reduced viewing angle, and addictionally, the game run a BFS to shown to you only what's connected to you, creating a discovery mechanism of caves if you're digging a corridor underground.
+  <p align="center">
+    <img src="media/dig ore.gif" alt="AAA" title="AAA" width="48%"/>
+    <img src="media/out.gif" alt="AAA" title="AAA" width="48%"/>
+  </p>
 - **look-up table** between current_item and tile object if the player interact with them.
-- **TIME MULTIPLIER** if you sleep inside houses or tower (x2), that can increased by putting the ores you gathered in a Mistery Cube [?] you can find underground.
