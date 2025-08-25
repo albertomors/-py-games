@@ -5,7 +5,7 @@ Just a repo containing some games I written using pygame during high school in a
 2) Pong is playable with WASD on the left and arrows on the right, and features a whole set of powerups (or downs) that makes the game more rich.
 3) Space invaders is my best piece: it mixes a lot of things i like: it's a visual beauty (in my opinion), it features 5 different weapons, different levels, powerups, cool pixelized-animations and randomness. P.S. I love how the flamethrower and the "being hit" effects got out, all thanks to randomness.
 
-and...
+    and...
 
 4) Isometric! Explore, dig, build, and survive in the Archipelago!
     Step into an isometric world of procedurally generated islands and caves, with day and night cycles, nature that changes with seasons, sun shadows, weather like rain and snow, and BEAUTIFULLY harmonic sea waves. Everything is purely realized using ONLY simple geometric shapes, randomicity and MATH :)
